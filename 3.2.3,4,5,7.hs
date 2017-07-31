@@ -33,7 +33,22 @@ GHCi> qsort [1,3,2,5]
 qsort' :: Ord a => [a] -> [a]
 qsort' [] = []
 qsort' [a] = [a]
-qsort' as = 
-    let h = head as 
-    in
-        qsort' (filter (< h) as) ++ (filter (== h) as) ++ qsort' (filter (> h) as)
+qsort' as@(h:as') = 
+    qsort' small ++ middle ++ qsort' large
+    where 
+        small = filter (< h) as
+        middle = filter (== h) as
+        large = filter (> h) as
+
+
+
+{-
+Напишите функцию squares'n'cubes, принимающую список чисел, 
+и возвращающую список квадратов и кубов элементов исходного списка.
+GHCi> squares'n'cubes [3,4,5]
+[9,27,16,64,25,125]
+-}
+
+squares'n'cubes :: Num a => [a] -> [a]
+squares'n'cubes = concat . (map (\x -> (x^2):(x^3):[]))
+    

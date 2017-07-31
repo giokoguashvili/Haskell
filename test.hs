@@ -34,3 +34,8 @@ takeWhile' _ [] = []
 takeWhile' p (a:as) 
     | p a = a : takeWhile' p as
     | otherwise = []
+
+dropWhile' :: (a -> Bool) -> [a] -> [a]
+dropWhile' p (a:as)
+    | p a = dropWhile' p as
+    | otherwise = 
