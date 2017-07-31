@@ -52,3 +52,55 @@ GHCi> squares'n'cubes [3,4,5]
 squares'n'cubes :: Num a => [a] -> [a]
 squares'n'cubes = concat . (map (\x -> (x^2):(x^3):[]))
     
+{-
+Воспользовавшись функциями map и concatMap, определите функцию perms, которая возвращает все перестановки, которые можно получить из данного списка, в любом порядке.
+
+GHCi> perms [1,2,3]
+[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+Считайте, что все элементы в списке уникальны, и что для пустого списка имеется одна перестановка.
+-}     
+perms :: [a] -> [[a]]
+perms [] = []   
+perms [a] = [[a]]
+perms (x:xs) = 
+    let 
+        blend a xs = (xs ++ [a]) : (iter' xs 0 [] (\x -> span' xs a x))
+
+        span' xs a i = (fst (sp xs i)) ++ (a:(snd (sp xs i)))
+        sp xs x = (take x xs, drop x xs) 
+
+        --iter' i n acc f = if i == (n + 1) then acc else iter' (i+1) n (f acc i) f 
+        iter' [] i acc f = acc
+        iter' (x:xs) i acc f = iter' xs (i + 1) ((f i) : acc) f   
+    in
+        concatMap (\y -> blend x y) (perms xs)
+
+
+-- blend a xs = (xs ++ [a]) : (iter' xs 0 [] (\x -> span' xs a x))
+
+-- span' xs a i = (fst (sp xs i)) ++ (a:(snd (sp xs i)))
+-- sp xs x = (take x xs, drop x xs) 
+
+-- --iter' i n acc f = if i == (n + 1) then acc else iter' (i+1) n (f acc i) f 
+
+
+-- iter' [] i acc f = acc
+-- iter' (x:xs) i acc f = iter' xs (i + 1) ((f i) : acc) f   
+
+{-
+Реализуйте функцию delAllUpper, удаляющую из текста все слова, целиком состоящие из символов в верхнем регистре. Предполагается, что текст состоит только из символов алфавита и пробелов, знаки пунктуации, цифры и т.п. отсутствуют.
+
+GHCi> delAllUpper "Abc IS not ABC"
+"Abc not"
+Постарайтесь реализовать эту функцию как цепочку композиций, аналогично revWords из предыдущего видео.
+-}
+
+delAllUpper :: String -> String
+delAllUpper str = 
+        unwords (filter (not . all' isUpper) (words str))
+        where 
+            all' p = and' . map p
+            and' [] = True
+            and' (x:xs) = x && and' xs 
+
+
