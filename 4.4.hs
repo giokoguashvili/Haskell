@@ -170,4 +170,46 @@ parsePerson s = case parseDictionary s of
                Just ag -> case all (`elem` ['0'..'9']) ag of
                    False -> Left  $ IncorrectDataError ag
                    True  -> Right $ Person { firstName = fn, lastName = ln, age = read ag }
+
+
+data Error = ParsingError | IncompleteDataError | IncorrectDataError String
+
+data Person = Person { firstName :: String, lastName :: String, age :: Int }
+
+parsePerson :: String -> Either Error Person
+parsePerson = go . map words . lines where
+    go [["firstName","=",f],["lastName","=",l],["age","=",a]]
+        | all (flip elem ['0'..'9']) a = 
+            Right $ Person { firstName = f, lastName = l, age = read a::Int }
+        | otherwise = Left $ IncorrectDataError a
+    go [a,b,c] = Left $ ParsingError
+    go _       = Left $ IncompleteDataError
+
+
+
+import Data.Maybe
+
+data Error = ParsingError | IncompleteDataError | IncorrectDataError String
+
+data Person = Person { firstName :: String, lastName :: String, age :: Int }
+
+parseSet :: String -> Either Error (String, String)
+parseSet = go . words where
+    go [n,"=",v] = Right (n,v)
+    go _         = Left ParsingError
+
+getField :: String -> [(String, String)] -> Either Error String
+getField n m = maybe (Left IncompleteDataError) Right $ lookup n m
+
+checkInt :: String -> Either Error Int
+checkInt s | all (`elem` ['0'..'9']) s = Right $ read s
+           | otherwise                 = Left  $ IncorrectDataError s 
+
+parsePerson :: String -> Either Error Person
+parsePerson s = do
+    m <- sequence . map parseSet . lines $ s
+    n <- getField "firstName" m
+    l <- getField "lastName" m
+    a <- getField "age" m >>= checkInt
+    return Person { firstName = n, lastName = l, age = a }
 -}
