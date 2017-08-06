@@ -2,7 +2,14 @@ module Demo where
 
 import Data.List.Split
 import Data.Char
+{-
+Реализуйте функцию parsePerson, которая разбирает строки вида firstName = John\nlastName = Connor\nage = 30 и возвращает либо результат типа Person, либо ошибку типа Error.
 
+Строка, которая подается на вход, должна разбивать по символу '\n' на список строк, каждая из которых имеет вид X = Y. Если входная строка не имеет указанный вид, то функция должна возвращать ParsingError.
+Если указаны не все поля, то возвращается IncompleteDataError.
+Если в поле age указано не число, то возвращается IncorrectDataError str, где str — содержимое поля age.
+Если в строке присутствуют лишние поля, то они игнорируются.
+-}
 data Error = ParsingError | IncompleteDataError | IncorrectDataError String deriving Show
 
 data Person = Person { firstName :: String, lastName :: String, age :: Int } deriving Show
@@ -134,3 +141,33 @@ validatedLines lines =
 -- age' str = valueOf "age" (pairs str)
 -- ageIsCorrect str = isNumber' (snd (age' str))
 -- isValidFields str = all (True==) (map (\f -> ((length (splitOn "=" f)) > 0) && ((length (splitOn " = " f)) > 0)) (fields str))
+
+{-
+sequence
+words
+lines
+lookup
+elem
+
+data Error = ParsingError | IncompleteDataError | IncorrectDataError String
+
+data Person = Person { firstName :: String, lastName :: String, age :: Int }
+
+parseDictionary :: String -> Maybe [(String, String)]
+parseDictionary = sequence . map (parseSet . words) . lines where
+    parseSet [n,"=",v] = Just (n,v)
+    parseSet _         = Nothing
+
+parsePerson :: String -> Either Error Person
+parsePerson s = case parseDictionary s of
+    Nothing -> Left ParsingError
+    Just d  -> case lookup "firstName" d of
+        Nothing -> Left IncompleteDataError
+        Just fn -> case lookup "lastName" d of
+            Nothing -> Left IncompleteDataError
+            Just ln -> case lookup "age" d of
+               Nothing -> Left IncompleteDataError
+               Just ag -> case all (`elem` ['0'..'9']) ag of
+                   False -> Left  $ IncorrectDataError ag
+                   True  -> Right $ Person { firstName = fn, lastName = ln, age = read ag }
+-}

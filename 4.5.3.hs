@@ -77,3 +77,22 @@ height (Node a b) = 1 + max (height a) (height b)
 size :: Tree a -> Int
 size (Leaf a) = 1
 size (Node a b) = 1 + size a + size b 
+
+{-
+Теперь нам нужно написать функцию avg, которая считает среднее арифметическое всех значений в дереве. И мы хотим, чтобы эта функция осуществляла только один проход по дереву. 
+Это можно сделать при помощи вспомогательной функции, возвращающей количество листьев и сумму значений в них. Реализуйте эту функцию.
+-}
+
+--data Tree a = Leaf a | Node (Tree a) (Tree a)
+
+avg :: Tree Int -> Int
+avg t =
+    let (c,s) = go t
+    in s `div` c
+  where
+    go :: Tree Int -> (Int,Int)
+    go (Leaf a) = (1, a)
+    go (Node a b) = (c1+c2,s1+s2) 
+        where
+            (c1,s1) = go a
+            (c2,s2) = go b
