@@ -127,11 +127,11 @@ data Expr = Val Int | Expr :+: Expr | Expr :*: Expr
     deriving (Show, Eq)
 
 expand :: Expr -> Expr
-expand ((e1 :+: e2) :*: (e3 :+: e4)) = 
-    expand (e1 :*: e3) :+: expand (e1 :*: e4) :+: expand (e2 :*: e3) :+: expand (e2 :*: e4)
 
-expand ((e1 :+: e2) :*: e) = expand (e1 :*: e :+: e2 :*: e)
-expand (e :*: (e1 :+: e2)) = expand (e :*: e1 :+: e :*: e2)
-expand (e1 :+: e2) = expand e1 :+: expand e2
-expand (e1 :*: e2) = expand e1 :*: expand e2
+expand ((e1 :+: e2) :*: e) = if ((e1 :+: e2) :*: e) == expand e1 :*: expand e :+: expand e2 :*: expand e then (expand e1 :*: expand e :+: expand e2 :*: expand e) else expand (expand e1 :*: expand e :+: expand e2 :*: expand e)
+expand (e :*: (e1 :+: e2)) = if (e :*: (e1 :+: e2)) == (expand e :*: expand e1 :+: expand e :*: expand e2) then (expand e :*: expand e1 :+: expand e :*: expand e2) else expand (expand e :*: expand e1 :+: expand e :*: expand e2)
+
+expand (e1 :+: e2) = if (e1 :+: e2) == (expand e1 :+: expand e2) then (e1 :+: e2) else expand (expand e1 :+: expand e2)
+expand (e1 :*: e2) = if (e1 :*: e2) == (expand e1 :*: expand e2) then  (e1 :*: e2) else expand (expand e1 :*: expand e2)
+
 expand e = e
