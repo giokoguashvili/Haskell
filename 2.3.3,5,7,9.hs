@@ -56,3 +56,7 @@ class (Enum a, Bounded a, Eq a) => SafeEnum a where
 instance SafeEnum Bool where
 instance SafeEnum Char where
 
+func :: (SafeEnum b) => b -> b
+func b = spred b
+
+func' b = spred b
