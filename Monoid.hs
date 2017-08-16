@@ -93,49 +93,29 @@ class MapLike m where
     fromList :: Ord k => [(k,v)] -> m k v
 
 newtype ArrowMap k v = ArrowMap { getArrowMap :: k -> Maybe v }
+newtype Endo k v = Endo { appEndo :: k -> Maybe v }
 
 instance MapLike ArrowMap where
     empty = ArrowMap (\k -> Nothing)
-    lookup = flip getArrowMap
-    insert k v (ArrowMap kvf) = ArrowMap (\k' -> if k' == k then Just v else kvf k')
-    delete k (ArrowMap kvf) = ArrowMap (\k' -> if k' == k then Nothing else kvf k')
-    fromList = foldr (\(k',v') mkvf -> insert k' v' mkvf) empty
-
-
-
-
-
--- import Prelude hiding (lookup)
-
--- class MapLike m where
---     empty :: m k v
---     lookup :: Ord k => k -> m k v -> Maybe v
---     insert :: Ord k => k -> v -> m k v -> m k v
---     delete :: Ord k => k -> m k v -> m k v
---     fromList :: Ord k => [(k,v)] -> m k v
-
--- newtype ArrowMap k v = ArrowMap { getArrowMap :: k -> Maybe v }
-
--- instance MapLike ArrowMap where
---     empty = ArrowMap (\k -> Nothing)
---     lookup k (ArrowMap kvf) = kvf k
---     insert k v (ArrowMap kvf) = let
---                                     mkvf = delete k (ArrowMap kvf)
---                                 in
---                                     case lookup k mkvf of
---                                     Nothing -> ArrowMap (\k' -> if k' == k then Just v else (getArrowMap mkvf) k')
---                                     _ -> mkvf
-
---     delete k (ArrowMap kvf) = case kvf k of
---                               (Just v) -> ArrowMap (\k' -> if k' == k then Nothing else kvf k')
---                               Nothing -> ArrowMap kvf
-
---     fromList kvfs =
---             let 
---                 kvfs' = kvfs
---                 fun = lookupF kvfs'
---                 lookupF [] k = Nothing
---                 lookupF ((k',v'):xs) k = if k == k' then Just v' else lookupF xs k   
---             in
---                 ArrowMap (\k -> fun k)
-                                       
+    lookup k (ArrowMap f) = case f k of
+                            (Just v) -> Just v
+                            _ -> Nothing
+    delete k (ArrowMap f) = case f k of
+                            (Just v) -> ArrowMap (\k' -> if k == k' then Nothing else f k)
+                            _ -> ArrowMap f
+    insert k v (ArrowMap f) = let
+                                am = delete k (ArrowMap f)
+                                kfFun k' = if k' == k then Just v else f k 
+                              in
+                                case am of
+                                (ArrowMap mf) -> case mf k of
+                                                 (Just v') -> ArrowMap (\k' -> if k' == k then Just v else mf k')  
+                                                 Nothing -> ArrowMap kfFun
+    fromList kvfs =
+            let 
+                kvfs' = kvfs
+                fun = lookupF kvfs'
+                lookupF [] k = Nothing
+                lookupF ((k',v'):xs) k = if k == k' then Just v' else lookupF xs k   
+            in
+                ArrowMap (\k -> fun k)
