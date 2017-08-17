@@ -12,3 +12,7 @@ infixl 1 .!
 x .! f = f x
 
 data PersonType a b = PersonData { f::a, f2::a, f3::b}
+
+
+func' :: () -> Bool
+func' () = True
