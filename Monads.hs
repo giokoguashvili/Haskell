@@ -49,3 +49,54 @@ execLoggers x f g =
             where
                 (Log fxs fa) = f x
                 (Log gxs ga) = g fa
+
+{-
+Функции с логированием из предыдущего задания возвращают в качестве результата значение с некоторой дополнительной информацией в виде списка сообщений. Этот список является контекстом. Реализуйте функцию returnLog
+
+returnLog :: a -> Log a
+
+которая является аналогом функции return для контекста Log. Данная функция должна возвращать переданное ей значение с пустым контекстом.
+-}
+
+returnLog :: a -> Log a
+returnLog a = Log [] a 
+
+{-
+Реализуйте фукцию bindLog
+
+bindLog :: Log a -> (a -> Log b) -> Log b
+которая работает подобно оператору >>= для контекста Log.
+
+GHCi> Log ["nothing done yet"] 0 `bindLog` add1Log
+Log ["nothing done yet","added one"] 1
+
+GHCi> Log ["nothing done yet"] 3 `bindLog` add1Log `bindLog` mult2Log
+Log ["nothing done yet","added one","multiplied by 2"] 8
+-}
+
+bindLog :: Log a -> (a -> Log b) -> Log b
+bindLog (Log ls x) f = Log (ls ++ fls) fx
+                    where
+                        (Log fls fx) = f x
+
+{-
+Реализованные ранее returnLog и bindLog позволяют объявить тип Log представителем класса Monad:
+
+instance Monad Log where
+    return = returnLog
+    (>>=) = bindLog
+Используя return и >>=, определите функцию execLoggersList
+
+execLoggersList :: a -> [a -> Log a] -> Log a
+которая принимает некоторый элемент, список функций с логированием и возвращает результат последовательного применения всех функций в списке к переданному элементу вместе со списком сообщений, которые возвращались данными функциями:
+
+GHCi> execLoggersList 3 [add1Log, mult2Log, \x -> Log ["multiplied by 100"] (x * 100)]
+Log ["added one","multiplied by 2","multiplied by 100"] 800
+-}
+
+-- instance Monad Log where
+--     return = returnLog
+--     (>>=) = bindLog
+
+execLoggersList :: a -> [a -> Log a] -> Log a
+execLoggersList a = foldl (\acc next -> bindLog acc next) (returnLog a)
