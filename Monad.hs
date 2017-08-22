@@ -1,4 +1,20 @@
 module Demo where
+    
+{-
+class Applicative m => Monad (m :: * -> *) where
+  (>>=) :: m a -> (a -> m b) -> m b
+  (>>) :: m a -> m b -> m b
+  return :: a -> m a
+  fail :: String -> m a
+-}
+
+{-
+1.  return a >>= k == k a
+2.  m >>= return == m
+3.  ?! (m >>= k) >>= k' == m >>= (k >>= k')
+                           m >>= ((\x -> k x) >>= k')
+-}
+
 
 {-
 f :: a -> m b
@@ -100,3 +116,26 @@ Log ["added one","multiplied by 2","multiplied by 100"] 800
 
 execLoggersList :: a -> [a -> Log a] -> Log a
 execLoggersList a = foldl (\acc next -> bindLog acc next) (returnLog a)
+
+
+{-
+class Monad m where
+    return :: a -> m a
+    (>>=) :: m a -> (a -> m b) -> m b
+    (>>) :: m a -> m b -> m b
+    x >> y = x >>= (\_ -> y)
+
+
+(=<<) :: Monad m => (a -> m b) -> m a -> m b
+(=<<) = flip (>>=)
+
+(<=<) :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+(<=<) f g x = g x >>= f
+-}
+
+
+-- newtype Identity a = Identity { runIdentity :: a } deriving (Eq, Show)
+
+-- instance Monad Identity where
+--     return = Identity
+--     Identity a >>= f = f a

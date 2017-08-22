@@ -1,6 +1,13 @@
 module Demo where
 
 {-
+class Functor (f :: * -> *) where
+  fmap :: (a -> b) -> f a -> f b
+  (<$) :: a -> f b -> f a
+-}
+
+
+{-
 Определите представителя класса Functor для следующего типа данных, представляющего точку в трёхмерном пространстве:
 
 data Point3D a = Point3D a a a deriving Show
