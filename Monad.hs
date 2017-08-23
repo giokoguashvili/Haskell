@@ -1,6 +1,22 @@
 module Demo where
     
 {-
+https://wiki.haskell.org/Monad_tutorials_timeline:
+
++ https://wiki.haskell.org/What_a_Monad_is_not
++ https://wiki.haskell.org/Monad_(sans_metaphors)
++ http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html
+- http://adit.io/posts/2013-06-10-three-useful-monads.html
+- http://learnyouahaskell.com/a-fistful-of-monads
+
+http://www.idryman.org/blog/2014/01/23/yet-another-monad-tutorial/
+https://en.wikibooks.org/wiki/Yet_Another_Haskell_Tutorial/Monads
+
+https://en.wikibooks.org/w/index.php?title=Haskell/Understanding_monads&oldid=933545
+https://wiki.haskell.org/All_About_Monads
+-}
+
+{-
 class Applicative m => Monad (m :: * -> *) where
   (>>=) :: m a -> (a -> m b) -> m b
   (>>) :: m a -> m b -> m b
