@@ -1,5 +1,9 @@
 module Demo where
 
+data DA = Da { contentA::String }
+data DB = Db { contentB::String }
+
+data DC = DA | DB
 
 data TypeA = TA 
 
