@@ -59,12 +59,14 @@ f <=< g = \a -> g a >>= f
 class Mond m where
     return' :: a -> m a
     (>>==) :: m a -> (a -> m b) -> m b
+    (>>>) :: m a -> m b -> m b
 
 newtype Id a = Id { runId :: a } deriving (Eq, Show)
 
 instance Mond Id where
     return' a = Id a
     Id a >>== k = k a
+    Id a >>> idB = idB
 
 wrapSucc :: Integer -> Id Integer
 wrapSucc x = Id (succ x) 
@@ -79,3 +81,32 @@ law2 = m >>== return' == m
 
 k' = (\b -> Id $ 2 * b)
 law3 = m >>== k >>== k' == m >>== (\b -> k b >>== k')
+
+
+goWrap0 =
+    wrapSucc 3 >>==
+    wrapSucc >>==
+    wrapSucc >>==
+    return'
+
+-- use law2 and write computation in another way
+-- wrapSucc 3 >>== wrapSucc >>== wrapSucc 
+-- wrapSucc 3 >>== (\x -> wrapSucc x >>== wrapSucc)
+goWrap1 = 
+    wrapSucc 3 >>== (\x ->
+    wrapSucc x >>== (\y ->
+    wrapSucc y >>== (\z ->
+    return' z)))
+
+
+goWrap2 = 
+    wrapSucc 3 >>== (\x -> -- x := succ 3;
+    wrapSucc x >>== (\y -> -- y := succ x;
+    wrapSucc y >>== (\z -> -- z := succ y;
+    return' (x,y,z))))     -- return (x,y,z)
+
+goWrap3 = 
+    wrapSucc 3 >>== \x ->
+    wrapSucc x >>== \y ->
+    wrapSucc y >>> 
+    return' (x,y)
