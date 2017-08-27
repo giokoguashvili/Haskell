@@ -72,7 +72,11 @@ wrapSucc :: Integer -> Id Integer
 wrapSucc x = Id (succ x) 
 
 -- runId $ wrapSucc 3 >>== return'
-
+{-
+1. return a >>= f ≡ f a
+2. f >>= return ≡ f
+3. f >>= (\x -> g x >>= h) ≡ (f >>= g) >>= h
+-}
 k = (\a -> Id $ succ a)
 law1 = return' 3 >>== k == k 3
 
@@ -110,3 +114,105 @@ goWrap3 =
     wrapSucc x >>== \y ->
     wrapSucc y >>> 
     return' (x,y)
+
+{-
+do { 
+    e1; 
+    e2 
+    } 
+
+e1 >> e2
+-}
+
+{-
+do {
+    p <- e1;
+    e2;
+    }
+
+e1 >>= (\p -> e2)
+-}
+
+{-
+do {
+    let v = e1;
+    e2
+    }
+
+let v = 
+    e1
+in
+    do { e2 }
+-}
+
+{-
+1. do {e} → e
+2. do {e; es} → e >> do {es}
+3. do {let decls; es} → let decls in do {es}
+4. do {p <- e; es} → let ok p = do {es} ; ok _ = fail "..." in e >>= ok
+-}
+goWrap4 = 
+    let i = 3 in
+    wrapSucc i >>== \x ->
+    wrapSucc x >>== \y ->
+    wrapSucc y >>> 
+    return' (i, x + y)
+
+
+wrapSucc' x = Just $ succ x
+wrapPred' x = Just $ pred x
+
+goWrap5 = do 
+    let i = 3 
+    x <- wrapSucc' i 
+    y <- wrapPred' x
+    --wrapSucc' y 
+    return (i, x + y)
+
+
+type Name = String
+type DataBase = [(Name,Name)]
+
+fathers, mothers :: DataBase
+fathers = [
+    ("Bill","John"),
+    ("Ann","John"),
+    ("John", "Piter")
+    ]
+
+mothers = [
+    ("Bill","Jane"),
+    ("Ann","Jane"),
+    ("John","Alice"),
+    ("Jane","Dorothy"),
+    ("Alice","Mary")
+    ]   
+
+getM, getF :: Name -> Maybe Name
+getM name = lookup name mothers
+getF name = lookup name fathers
+
+getM' = flip lookup $ mothers
+
+granmas :: Name -> Maybe (Name,Name)
+granmas name = do
+    m <- getM name
+    gmm <- getM m
+
+    f <- getF name
+    gmf <- getM f
+    return (gmm,gmf)
+
+
+list = [(x,y) | x <- [1,2,3], y <- [4,5,6]]
+
+
+list' = do
+    x <- [1,2,3]
+    y <- [4,5,6]
+    return (x,y)
+
+list'' =
+    [1,2,3] >>= (\x ->
+    [4,5,6] >>= (\y ->
+    return (x,y)))
