@@ -81,3 +81,9 @@ module Demo where
     putStr' :: String -> IO ()
     putStr' [] = return ()
     putStr' (ch:chs) = putChar ch >> putStr' chs
+
+    seq_ :: (Monad m, Foldable t) => t (m a) -> m ()
+    seq_ = foldr (>>) (return ())
+
+    putStrLn' :: String -> IO ()
+    putStrLn' str = seq_ . map putChar $ str ++ "\n"
