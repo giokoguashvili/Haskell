@@ -42,11 +42,11 @@ main' = do
         putStrLn "Canceled"
         return ()
     else do 
-        filePaths <- getDirectoryContents "./"
+        filePaths <- getDirectoryContents "."
         let validPaths = filter (\fp -> filePath `isInfixOf` fp) filePaths
         sequence_ (fmap removeFile' validPaths)
         removeFile' filePath
-
-removeFile' filePath = do
-    putStr $ "Removing file: " ++ filePath
-    removeFile $ "./" ++ filePath
+    where
+        removeFile' filePath = do
+            putStr $ "Removing file: " ++ filePath
+            removeFile $ "." ++ filePath
