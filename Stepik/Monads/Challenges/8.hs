@@ -37,16 +37,14 @@ main' :: IO ()
 main' = do
     putStr "Substring: "
     filePath <- getLine
-    if filePath == "\n" then do
-        putStr "\n"
+    if filePath == "" then do
         putStrLn "Canceled"
         return ()
     else do 
         filePaths <- getDirectoryContents "."
         let validPaths = filter (\fp -> filePath `isInfixOf` fp) filePaths
         sequence_ (fmap removeFile' validPaths)
-        removeFile' filePath
     where
         removeFile' filePath = do
-            putStr $ "Removing file: " ++ filePath
-            removeFile $ "." ++ filePath
+            putStrLn $ "Removing file: " ++ filePath
+            removeFile filePath
