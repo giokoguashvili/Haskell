@@ -2,10 +2,7 @@ module Demo where
 
     {-
         https://wiki.haskell.org/IO_inside
-    -}
-
-    {-
-    newtype IO a = IO (RealWord -> (RealWord, a))
+        http://conscientiousprogrammer.com/blog/2015/12/11/24-days-of-hackage-2015-day-11-monad-loops-avoiding-writing-recursive-functions-by-refactoring/
     -}
 
     main = getLine >>= (\str -> putStrLn $ str ++ "!") 
@@ -50,3 +47,37 @@ module Demo where
                         (b,i2) = getchar i1
     
     -}
+
+
+    {-
+        1.
+            newtype IO a = IO (RealWord -> (RealWord, a))
+
+            main :: RealWorld -> ((), RealWorld)
+            type IO a  =  RealWorld -> (a, RealWorld)
+
+        2.
+            main :: IO ()
+            getChar :: IO Char
+
+            main w0 = 
+                let
+                    (ch1, w1) = getChar w0
+                    (ch2, w2) = getChar w1
+                in
+                    ((), w2)
+
+    -}
+
+    getLine' :: IO String
+    getLine' = do
+        ch <- getChar
+        if ch == '\n' then
+            return []
+        else do
+            chs <- getLine'
+            return (ch:chs)
+
+    putStr' :: String -> IO ()
+    putStr' [] = return ()
+    putStr' (ch:chs) = putChar ch >> putStr' chs
