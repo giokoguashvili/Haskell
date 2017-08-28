@@ -239,6 +239,6 @@ lst''' = do
     if x/=y then
         [True]
     else
-        []
+        [] 
     return (x,y)
         
